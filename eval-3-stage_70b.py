@@ -57,23 +57,27 @@ def get_responses(model_name):
     with open(output_path, "a") as outfile:
         for question in tqdm(questions, desc=f"Processing {model_name}"):
             # ...existing code...
-            prompt = f"""You are a precise QA assistant. Answer the question using ONLY the given context.
-            Output ONLY the final answer as a single line, with no explanations, no extra text, no formatting, and no repeated question or context.
-            If the answer is a name or title, output ONLY the name or title.
-            If the answer is not present in the context, output exactly: I don't know.
-            Do not add any extra words, sentences, or formatting.
-            Examples:
-            Context: The capital of France is Paris.
-            Question: What is the capital of France?
-            Answer: Paris
-
-            Context: The text does not mention the winner.
-            Question: Who won the match?
-            Answer: I don't know
-
-            Context: {question[2]}
-            Question: {question[0]}
-            Answer:"""
+            prompt = (
+                "You are a question answering assistant.\n"
+                "You MUST answer ONLY using the provided context and question below.\n"
+                "Do NOT ask the user to provide the context or question. They are already provided.\n"
+                "Do NOT say things like 'Sure', 'Please provide', or 'I'm happy to help'.\n"
+                "Your answer MUST be a single line containing ONLY the answer, with no extra text, no explanations, and no formatting. DO NOT REWORD THE QUESTION\n"
+                "If the answer is not present in the context, say exactly: I don't know.\n"
+                "\n"
+                "Examples:\n"
+                "Context: The capital of France is Paris.\n"
+                "Question: What is the capital of France?\n"
+                "Answer: Paris\n"
+                "\n"
+                "Context: The text does not mention the winner.\n"
+                "Question: Who won the match?\n"
+                "Answer: I don't know\n"
+                "\n"
+                f"Context: {question[2]}\n"
+                f"Question: {question[0]}\n"
+                "Answer:"
+            )
             # ...existing code...
             #print(prompt)
             response: ChatResponse = chat(
@@ -90,7 +94,7 @@ def get_responses(model_name):
 
 
 models = [
-    "llama2:13b",
+    "llama2:70b"
 ]
 for model in models:
     ensure_model_pulled(model)

@@ -36,9 +36,10 @@ def single_f1(pred, gt):
 
 check_path = "check.jsonl"
 
-clean_path = "llama2_13b_responses_clean.jsonl"
-mixed_path = "llama2_13b_responses_mixed.jsonl"
-fab_path = "llama2_13b_responses_fab.jsonl"
+#clean_path = "Mixtral_responses_clean.jsonl"
+#mixed_path = "Mixtral_responses_mixed.jsonl"
+#fab_path = "Mixtral_responses_fab.jsonl"
+shuffled_path = "llama2_70b_responses_shuffled.jsonl"
 
 id_to_obj = {}
 with open(check_path, "r") as infile:
@@ -49,7 +50,7 @@ with open(check_path, "r") as infile:
         obj = json.loads(line)
         qid = obj["question_id"]
         id_to_obj[qid] = obj
-
+'''
 with open(clean_path, "r") as infile:
     em_count = 0
     sem_count = 0
@@ -116,5 +117,29 @@ with open(fab_path, "r") as infile:
             f1_score += single_f1(gen_answer, original_answer)
     total = len(id_to_obj)
     print("======================================================FABRICATED RESPONSES=======================================================")
+    print(f"EM: {em_count}/{total} ({em_count/total:.2%}), SEM: {sem_count}/{total} ({sem_count/total:.2%}), F1: {f1_score/total:.4f}")
+    print("=============================================================================================================================")
+
+'''
+with open(shuffled_path, "r") as infile:
+    em_count = 0
+    sem_count = 0
+    f1_score = 0
+    for line in infile:
+        line = line.strip()
+        if not line:
+            continue
+        obj = json.loads(line)
+        qid = obj["question_id"]
+        gen_answer = normalize_text(obj["answer"])
+        if qid in id_to_obj:
+            original_answer = id_to_obj[qid]["original_answers"][0]
+            if compute_exact_match(gen_answer, original_answer):
+                em_count += 1
+            if compute_subspan_exact_match(gen_answer, original_answer):
+                sem_count += 1
+            f1_score += single_f1(gen_answer, original_answer)
+    total = len(id_to_obj)
+    print("======================================================SHUFFLED RESPONSES=======================================================")
     print(f"EM: {em_count}/{total} ({em_count/total:.2%}), SEM: {sem_count}/{total} ({sem_count/total:.2%}), F1: {f1_score/total:.4f}")
     print("=============================================================================================================================")
